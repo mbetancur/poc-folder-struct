@@ -13,4 +13,10 @@ export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 if (process.env.NODE_ENV !== "production") globalThis.prismaGlobal = prisma;
 
-export const xprisma = new PrismaClient().$extends(withBark({ modelNames: ['folder', 'file'] }))
+export const xprisma = new PrismaClient().$extends(withBark({ modelNames: ['barkNode'] }))
+
+import { enhance } from '@zenstackhq/runtime';
+
+export function getEnhancedPrisma() {
+  return enhance(xprisma);
+}
