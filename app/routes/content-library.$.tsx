@@ -46,7 +46,6 @@ export async function loader({ params }: Route.LoaderArgs) {
 
     let currentParent = rootFolder;
     while (childPathQueue.length >= 0) {
-      console.log("currentParent", currentParent);
       const nodes: BarkNode[] | null = await xprisma.barkNode.findChildren({
         node: currentParent,
         select: {
@@ -73,7 +72,8 @@ export async function loader({ params }: Route.LoaderArgs) {
       if (nextNode) {
         currentParent = nextNode;
       } else {
-        // TODO: handle this case maybe we should throw an error + notification
+        console.error("Path doesn't exists");
+        // TODO: handle this case properly. Also, we should throw an error + notification
         // Path doesn't exist, break out of loop? 
         break;
       }
@@ -110,7 +110,7 @@ export async function action({ request }: Route.ActionArgs) {
       return { error: "Please select a file to upload" };
     }
 
-    await handleContentAction(intent, parentId, displayPath, file);
+    await handleContentAction(intent, parentId, displayPath, file, request);
     return redirect(request.url);
   } catch (error) {
     console.error("Error in action:", error);
