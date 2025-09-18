@@ -2,6 +2,7 @@ import type { Route } from "./+types/content-library.$";
 import { redirect } from "react-router";
 
 import { xprisma } from "~/utils/prisma.server";
+import { handleContentAction } from "~/utils/content-actions.server";
 import ColumnsSlider from "~/components/ColumnsSlider";
 import ContentActions from "~/components/ContentActions";
 
@@ -45,6 +46,7 @@ export async function loader({ params }: Route.LoaderArgs) {
 
     let currentParent = rootFolder;
     while (childPathQueue.length >= 0) {
+      console.log("currentParent", currentParent);
       const nodes: BarkNode[] | null = await xprisma.barkNode.findChildren({
         node: currentParent,
         select: {
@@ -103,38 +105,13 @@ export async function action({ request }: Route.ActionArgs) {
   const intent = formData.get("intent") as string;
 
   try {
-    const futureParentNode = await xprisma.barkNode.findUnique({
-      where: { id: parentId },
-    });
-
-    if (!futureParentNode) {
-      throw new Error("Parent node not found");
-    }
-
-    let child;
-
-    if (intent === "create-folder") {
-      const newDisplayPath = `${displayPath}/New Folder`;
-      child = await xprisma.barkNode.createChild({
-        node: futureParentNode,
-        data: { name: "New Folder", isFolder: true, displayPath: newDisplayPath }
-      });
-      console.log("Successfully created folder:", child);
-    } else if (intent === "upload-file") {
-      const newDisplayPath = `${displayPath}/new-file.txt`;
-      child = await xprisma.barkNode.createChild({
-        node: futureParentNode,
-        data: { name: "new-file.txt", isFolder: false, displayPath: newDisplayPath }
-      });
-      console.log("Successfully created file:", child);
-    } else {
-      throw new Error("Invalid intent");
-    }
-
+    await handleContentAction(intent, parentId, displayPath);
     return redirect(request.url);
   } catch (error) {
     console.error("Error in action:", error);
-    return { error: error instanceof Error ? error.message : `Failed to ${intent === "create-folder" ? "create folder" : "upload file"}` };
+    return { 
+      error: error instanceof Error ? error.message : `Failed to ${intent === "create-folder" ? "create folder" : "upload file"}` 
+    };
   }
 }
 
