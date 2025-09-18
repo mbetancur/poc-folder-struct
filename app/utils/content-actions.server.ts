@@ -19,12 +19,18 @@ export async function createFolder(parentNode: BarkNode, displayPath: string): P
   return child;
 }
 
-export async function createFile(parentNode: BarkNode, displayPath: string): Promise<BarkNode> {
-  const newDisplayPath = `${displayPath}/new-file.txt`;
+export async function createFile(parentNode: BarkNode, displayPath: string, file: File): Promise<BarkNode> {
+  let fileName = "new-file.txt";
+  
+  if (file) {
+    fileName = file.name;
+  }
+  
+  const newDisplayPath = `${displayPath}/${fileName}`;
   
   const child = await xprisma.barkNode.createChild({
     node: parentNode,
-    data: { name: "new-file.txt", isFolder: false, displayPath: newDisplayPath }
+    data: { name: fileName, isFolder: false, displayPath: newDisplayPath }
   });
   
   console.log("Successfully created file:", child);
@@ -34,7 +40,8 @@ export async function createFile(parentNode: BarkNode, displayPath: string): Pro
 export async function handleContentAction(
   intent: string, 
   parentId: string, 
-  displayPath: string
+  displayPath: string,
+  file: File
 ): Promise<BarkNode> {
   const futureParentNode = await findParentNode(parentId);
 
@@ -46,7 +53,7 @@ export async function handleContentAction(
     case "create-folder":
       return await createFolder(futureParentNode, displayPath);
     case "upload-file":
-      return await createFile(futureParentNode, displayPath);
+      return await createFile(futureParentNode, displayPath, file);
     default:
       throw new Error("Invalid intent");
   }

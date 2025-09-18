@@ -103,9 +103,14 @@ export async function action({ request }: Route.ActionArgs) {
   const parentId = formData.get("parentId") as string;
   const displayPath = formData.get("displayPath") as string;
   const intent = formData.get("intent") as string;
+  const file = formData.get("file") as File;
 
   try {
-    await handleContentAction(intent, parentId, displayPath);
+    if (intent === "upload-file" && !file) {
+      return { error: "Please select a file to upload" };
+    }
+
+    await handleContentAction(intent, parentId, displayPath, file);
     return redirect(request.url);
   } catch (error) {
     console.error("Error in action:", error);
