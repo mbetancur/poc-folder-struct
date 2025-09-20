@@ -21,6 +21,7 @@ export async function loader({ params }: Route.LoaderArgs) {
   const childPathQueue: string[] = [];
   const pathSegments = splat.split('/').filter(Boolean);
 
+  // Arrange the path segments into a queue
   pathSegments.forEach((segment) => {
     if (childPathQueue.length > 0) {
       childPathQueue.push(childPathQueue[childPathQueue.length - 1] + "/" + segment);
@@ -122,7 +123,6 @@ export async function action({ request }: Route.ActionArgs) {
 
 export default function ContentLibrary({ loaderData }: Route.ComponentProps) {
   const { rootFolder, currentActiveFolder, nodeStructure, error } = loaderData;
-  console.log("nodeStructure", nodeStructure);
 
   if (error) {
     return <div>Error: {error}</div>;
