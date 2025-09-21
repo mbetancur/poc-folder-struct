@@ -9,26 +9,37 @@ interface ContentActionsProps {
 export default function ContentActions({ parentNode }: ContentActionsProps) {
   return (
     <div className="flex gap-4 m-4">
-      <Form method="post">
-        <input type="hidden" name="parentId" value={parentNode.id} />
-        <input type="hidden" name="displayPath" value={parentNode.displayPath} />
-        <input type="hidden" name="intent" value="create-folder" />
-        <Button type="submit">Create Folder</Button>
-      </Form>
       <Form method="post" encType="multipart/form-data">
         <input type="hidden" name="parentId" value={parentNode.id} />
         <input type="hidden" name="displayPath" value={parentNode.displayPath} />
-        <input type="hidden" name="intent" value="upload-file" />
+        <input type="hidden" name="intent" value="" />
 
-        {/* // TODO: Add button styles to show the file input */}
-        {/* TODO: Add files restriction */}
-        <input
-          type="file" 
-          name="file" 
-          required
-          className="file:hidden bg-gray-200 p-1 rounded-md"
-          onChange={(e) => e.target.form?.requestSubmit()}
-        />
+        <div className="flex gap-4">
+          <Button
+            type="submit"
+            onClick={(e) => {
+              const form = e.currentTarget.form;
+              const intentInput = form?.querySelector('input[name="intent"]') as HTMLInputElement;
+              if (intentInput) intentInput.value = 'create-folder';
+            }}
+          >
+            Create Folder
+          </Button>
+
+          <input
+            type="file"
+            name="file"
+            className="file:py-2 file:px-4 file:rounded-md file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 file:cursor-pointer cursor-pointer"
+            onChange={(e) => {
+              if (e.target.files?.[0]) {
+                const form = e.target.form;
+                const intentInput = form?.querySelector('input[name="intent"]') as HTMLInputElement;
+                if (intentInput) intentInput.value = 'upload-file';
+                form?.requestSubmit();
+              }
+            }}
+          />
+        </div>
       </Form>
     </div>
   );

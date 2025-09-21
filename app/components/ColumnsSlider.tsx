@@ -36,10 +36,9 @@ function EmptyColumn() {
 }
 
 export default function ColumnsSlider({ rootFolder, nodes }: { rootFolder: BarkNode, nodes: BarkNode[][] }) {
-  // const [children, setChildren] = useState([]);
 
   return (
-    <Container className={"overflow-x-auto"} size="100%">
+    <Container className={"overflow-x-auto"} size="100%" pb={"md"}>
       <Flex
         direction={{ base: 'row' }}
       >

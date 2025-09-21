@@ -20,7 +20,7 @@ model barkNode {
   depth        Int     @default(1)
   numchild     Int     @default(0)
   isFolder     Boolean @default(true)
-  displayPath  String
+  displayPath  String  @unique()
   supabasePath String?
 
   @@index([path])

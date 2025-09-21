@@ -3,8 +3,10 @@ import { redirect } from "react-router";
 
 import { xprisma } from "~/utils/prisma.server";
 import { handleContentAction } from "~/utils/content-actions.server";
+
 import ColumnsSlider from "~/components/ColumnsSlider";
 import ContentActions from "~/components/ContentActions";
+import DetailsPanel from "~/components/DetailsPanel";
 
 export interface BarkNode {
   id: string;
@@ -14,12 +16,28 @@ export interface BarkNode {
   numchild: number;
   isFolder: boolean;
   displayPath: string;
+  supabasePath: string | null;
 }
 
 export async function loader({ params }: Route.LoaderArgs) {
   const splat = params["*"] || "";
   const childPathQueue: string[] = [];
   const pathSegments = splat.split('/').filter(Boolean);
+  // TODO: improve this file validation
+  // FIXME: includes fails when no root name
+  const isFile = pathSegments[pathSegments.length - 1].includes(".png");
+  let activeFile: BarkNode | null = null;
+  if (pathSegments.length > 0 && isFile) {
+    try {
+      activeFile = await xprisma.barkNode.findUnique({
+        where: {
+          displayPath: `/${splat}`
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching file:", error);
+    }
+  }
 
   // Arrange the path segments into a queue
   pathSegments.forEach((segment) => {
@@ -86,7 +104,8 @@ export async function loader({ params }: Route.LoaderArgs) {
       rootFolder: rootFolder,
       currentActiveFolder: currentActiveFolder,
       nodeStructure,
-      error: null
+      error: null,
+      activeFile: activeFile
     };
 
   } catch (error) {
@@ -115,15 +134,14 @@ export async function action({ request }: Route.ActionArgs) {
     return redirect(request.url);
   } catch (error) {
     console.error("Error in action:", error);
-    return { 
-      error: error instanceof Error ? error.message : `Failed to ${intent === "create-folder" ? "create folder" : "upload file"}` 
+    return {
+      error: error instanceof Error ? error.message : `Failed to ${intent === "create-folder" ? "create folder" : "upload file"}`
     };
   }
 }
 
 export default function ContentLibrary({ loaderData }: Route.ComponentProps) {
-  const { rootFolder, currentActiveFolder, nodeStructure, error } = loaderData;
-
+  const { rootFolder, currentActiveFolder, nodeStructure, error, activeFile } = loaderData;
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -141,6 +159,7 @@ export default function ContentLibrary({ loaderData }: Route.ComponentProps) {
       <h1>Content Library </h1>
       <ContentActions parentNode={currentActiveFolder} />
       <ColumnsSlider rootFolder={rootFolder} nodes={nodeStructure || []} />
+      <DetailsPanel file={activeFile} />
     </div>
   );
 }
