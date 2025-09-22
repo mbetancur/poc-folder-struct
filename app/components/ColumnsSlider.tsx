@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { Flex, Box, Stack, Container } from '@mantine/core';
 import { Link } from 'react-router';
 import type { BarkNode } from '~/routes/content-library.$';
@@ -12,15 +10,11 @@ function Column({ data }: { data: BarkNode[] }) {
         <Box
           key={item.id}
           className="min-w-100"
-        // onClick={() => {
-        //   // fetchChildren(item.displayPath);
-        // }}
         >
-          {item.isFolder ? (
-            <Link to={'/content-library' + item.displayPath}> 📁{item?.name}</Link>
-          ) : (
-            <div>📄{item?.name}</div>
-          )}
+          <Link to={'/content-library' + item.displayPath}>
+            {item.isFolder ? ' 📁' : ' 📄'}
+            {item?.name}
+          </Link>
         </Box>
       ))}
     </Stack>

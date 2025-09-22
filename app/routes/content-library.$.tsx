@@ -39,6 +39,7 @@ export async function loader({ params }: Route.LoaderArgs) {
     }
   }
 
+  // This piece looks a bit weird, but it's because we need to handle the root folder differently
   // Arrange the path segments into a queue
   pathSegments.forEach((segment) => {
     if (childPathQueue.length > 0) {
@@ -157,9 +158,10 @@ export default function ContentLibrary({ loaderData }: Route.ComponentProps) {
   return (
     <div>
       <h1>Content Library </h1>
+      {/* Wrapper for these */}
       <ContentActions parentNode={currentActiveFolder} />
       <ColumnsSlider rootFolder={rootFolder} nodes={nodeStructure || []} />
-      <DetailsPanel file={activeFile} />
+      <DetailsPanel file={activeFile || undefined} />
     </div>
   );
 }
